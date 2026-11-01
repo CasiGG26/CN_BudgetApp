@@ -10,26 +10,25 @@
 :root{--bg:#eef2f4;--card:#fff;--ink:#17222b;--mute:#64748b;--acc:#0f6b5f;--over:#b4372a;--line:#d8e0e5}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,system-ui,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
-main{max-width:520px;margin:0 auto;padding:16px}
+main{max-width:560px;margin:0 auto;padding:16px}
 section{background:var(--card);border-radius:14px;padding:14px;margin-bottom:14px}
 h2{font-size:15px;margin:0 0 10px;color:var(--mute);font-weight:600}
 input,select,button{font:inherit;width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);margin-bottom:8px}
-.row{display:flex;gap:8px}.row>*{flex:1}
+.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
 button.p{background:var(--acc);color:#fff;border:0;font-weight:600}
-.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.nav button{width:44px;margin:0}
-.big{font-size:30px;font-weight:700;margin:0}
-.cat{margin:10px 0;cursor:pointer}
-.cat div:first-child{display:flex;justify-content:space-between;font-size:15px}
-.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:4px}
-.bar i{display:block;height:100%;background:var(--acc)}.bar i.o{background:var(--over)}
-.it{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-top:1px solid var(--line)}
-.it small{color:var(--mute);display:block}
-.it b{white-space:nowrap}.x{color:var(--mute);border:0;background:none;width:auto;padding:0 4px;margin:0}
-#msg{color:var(--over);font-size:14px;min-height:18px}
+.tabs{display:flex;gap:6px;margin-bottom:14px}.tabs button{margin:0;border:0;background:#dde5ea;color:var(--mute);font-weight:600}.tabs button.on{background:var(--ink);color:#fff}
 .tg button{margin-bottom:10px}.tg button:not(.p){color:var(--mute)}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.nav button{width:44px;margin:0}
 .sum{display:flex;gap:8px;margin-bottom:6px}.sum>div{flex:1}.sum small{color:var(--mute);display:block;font-size:13px}.sum b{font-size:18px}.sum b.neg,.it b.neg{color:var(--over)}.it b.pos{color:var(--acc)}
-.yr{display:grid;grid-template-columns:34px 1fr 84px;gap:8px;align-items:center;margin:7px 0;font-size:14px}.yr .bar{margin:2px 0;height:6px}.yr .bar i.u{background:#7a8b99}.yr b{text-align:right;font-weight:600}.yr b.neg{color:var(--over)}
+.cat{margin:10px 0;cursor:pointer}.cat div:first-child{display:flex;justify-content:space-between;font-size:15px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:4px}.bar i{display:block;height:100%;background:var(--acc)}.bar i.o{background:var(--over)}
+.it{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-top:1px solid var(--line);cursor:pointer}
+.it small{color:var(--mute);display:block}.it b{white-space:nowrap}
+.ch{display:flex;gap:4px;height:150px;margin:8px 0 4px}.col{flex:1;display:flex;flex-direction:column;min-width:0}
+.bars{flex:1;display:flex;align-items:flex-end;gap:2px;border-bottom:1px solid var(--line)}.bars i{flex:1;min-height:1px;border-radius:3px 3px 0 0}
+.col small{text-align:center;font-size:11px;color:var(--mute);padding-top:3px}
+#msg{color:var(--over);font-size:14px;min-height:18px}
+.del{color:var(--over)}
 .link{color:var(--mute);font-size:13px;text-align:center;cursor:pointer}
 </style></head><body><main>
 <section id="setup" hidden>
@@ -40,42 +39,77 @@ button.p{background:var(--acc);color:#fff;border:0;font-weight:600}
 <button class="p" onclick="saveSetup()">Opslaan</button>
 </section>
 <div id="app" hidden>
+<div class="tabs"><button id="t0" onclick="tab(0)">Maand</button><button id="t1" onclick="tab(1)">Alle posten</button><button id="t2" onclick="tab(2)">Grafieken</button></div>
+
+<div id="v0">
 <section>
 <div class="row tg"><button id="tU" class="p" onclick="setT('uit')">Uitgave</button><button id="tI" onclick="setT('in')">Inkomst</button></div>
+<h2 id="fT">Nieuwe post</h2>
 <div class="row"><input id="bedrag" type="number" inputmode="decimal" step="0.01" placeholder="Bedrag €"><input id="datum" type="date"></div>
 <select id="cat"></select>
 <input id="notitie" placeholder="Notitie (optioneel)">
-<button class="p" onclick="add()">Toevoegen</button>
+<button class="p" id="bA" onclick="add()">Toevoegen</button>
+<div class="row"><button id="bC" onclick="resetForm()" hidden>Annuleren</button><button id="bD" class="del" onclick="del(E)" hidden>Verwijderen</button></div>
 <div id="msg"></div>
 </section>
 <section>
 <div class="nav"><button onclick="mv(-1)">‹</button><strong id="mnd"></strong><button onclick="mv(1)">›</button></div>
 <div class="sum"><div><small>Inkomsten</small><b id="sIn"></b></div><div><small>Uitgaven</small><b id="sUit"></b></div><div><small>Saldo</small><b id="sSal"></b></div></div>
 <div id="cats"></div>
-<div class="link" id="wie"></div><div class="link">Tik op een categorie om het maandbudget in te stellen</div>
+<div class="link" id="wie"></div>
+<div class="link">Tik op een categorie voor het maandbudget</div>
 </section>
-<section><h2>Deze maand</h2><div id="list"></div></section>
-<section><h2 id="yT"></h2><div id="year"></div></section>
+<section><h2>Deze maand (tik om te bewerken)</h2><div id="list"></div></section>
+</div>
+
+<div id="v1" hidden>
+<section>
+<div class="row"><input id="fFrom" type="date" onchange="renderAll()"><input id="fTo" type="date" onchange="renderAll()"></div>
+<div class="row"><select id="fCat" onchange="renderAll()"></select><select id="fType" onchange="renderAll()"><option value="">Alles</option><option value="uit">Uitgaven</option><option value="in">Inkomsten</option></select></div>
+<input id="fQ" placeholder="Zoeken in notitie" oninput="renderAll()">
+<div class="row"><button onclick="clearF()">Filters wissen</button><button onclick="csv()">Kopieer CSV</button></div>
+<div id="fSum" class="link"></div>
+</section>
+<section><div id="all"></div></section>
+</div>
+
+<div id="v2" hidden>
+<section>
+<div class="row"><select id="cR" onchange="renderCharts()"><option value="3">3 maanden</option><option value="6" selected>6 maanden</option><option value="12">12 maanden</option></select><select id="cC" onchange="renderCharts()"></select></div>
+</section>
+<section><h2>Inkomsten en uitgaven per maand</h2><div id="c1"></div></section>
+<section><h2 id="c2T"></h2><div id="c2"></div></section>
+<section><h2>Uitgaven per categorie</h2><div id="c3"></div></section>
+</div>
+
 <div class="link" onclick="resetSetup()">Instellingen wijzigen</div>
 </div></main>
 <script>
 const CATS=['Boodschappen','Auto & vervoer','Huis','Kinderen','Uit eten','Vrije tijd','Gezondheid','Overig'];
 const INCATS=['Loon','Kinderbijslag','Terugbetaling','Overig inkomen'];
-let T='uit';
+const MS=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
 const $=id=>document.getElementById(id);
-let S=JSON.parse(localStorage.getItem('s')||'{}'),D=JSON.parse(localStorage.getItem('d')||'{"uitgaven":[],"budgetten":{}}'),M=new Date().toISOString().slice(0,7);
+let S=JSON.parse(localStorage.getItem('s')||'{}'),D=JSON.parse(localStorage.getItem('d')||'{"uitgaven":[],"budgetten":{}}'),M=new Date().toISOString().slice(0,7),T='uit',E=null,V=0;
 const eur=n=>'€ '+Number(n).toLocaleString('nl-BE',{minimumFractionDigits:2,maximumFractionDigits:2});
-const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sum=a=>a.reduce((s,u)=>s+Number(u.bedrag),0);
+const opts=a=>a.map(c=>`<option>${c}</option>`).join('');
+const item=u=>`<div class="it" onclick="edit('${esc(u.id)}')"><div>${esc(u.notitie)||esc(u.categorie)}<small>${esc(u.datum)} · ${esc(u.categorie)} · ${esc(u.wie)}</small></div><b class="${u.type==='in'?'pos':''}">${u.type==='in'?'+ ':''}${eur(u.bedrag)}</b></div>`;
+function monthKeys(n){const d=new Date(),a=[];for(let i=n-1;i>=0;i--){const t=new Date(d.getFullYear(),d.getMonth()-i,1);a.push(t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0'))}return a}
 function init(){
-  if(!S.url){$('setup').hidden=false;return}
+  if(!S.url){$('setup').hidden=false;$('app').hidden=true;return}
   $('setup').hidden=true;$('app').hidden=false;
-  setT(T);
+  $('fCat').innerHTML='<option value="">Alle categorieën</option>'+opts(CATS.concat(INCATS));
+  $('cC').innerHTML='<option value="uit">Alle uitgaven</option><option value="in">Alle inkomsten</option>'+opts(CATS.concat(INCATS));
   $('datum').value=new Date().toISOString().slice(0,10);
-  render();load();
+  setT(T);tab(0);load();
 }
-function setT(t){
-  T=t;$('cat').innerHTML=(t==='in'?INCATS:CATS).map(c=>`<option>${c}</option>`).join('');
+function setT(t,c){
+  T=t;$('cat').innerHTML=opts(t==='in'?INCATS:CATS);if(c)$('cat').value=c;
   $('tU').className=t==='uit'?'p':'';$('tI').className=t==='in'?'p':'';
+}
+function tab(n){
+  V=n;[0,1,2].forEach(i=>{$('v'+i).hidden=i!==n;$('t'+i).className=i===n?'on':''});render();
 }
 function saveSetup(){
   S={url:$('sUrl').value.trim(),token:$('sTok').value.trim(),naam:$('sNaam').value.trim()||'Ik'};
@@ -91,54 +125,90 @@ async function load(){
   try{D=await call();localStorage.setItem('d',JSON.stringify(D));render()}
   catch(e){$('msg').textContent='Kon niet synchroniseren: '+e.message}
 }
+const save=()=>localStorage.setItem('d',JSON.stringify(D));
 async function add(){
   const b=parseFloat($('bedrag').value.replace(',','.'));
   if(!b||b<=0){$('msg').textContent='Vul een bedrag in.';return}
-  const u={id:Date.now().toString(36),datum:$('datum').value,bedrag:b,categorie:$('cat').value,notitie:$('notitie').value,wie:S.naam,type:T};
-  D.uitgaven.push(u);render();$('bedrag').value='';$('notitie').value='';$('msg').textContent='';
-  try{await call({actie:'add',...u});localStorage.setItem('d',JSON.stringify(D))}
-  catch(e){$('msg').textContent='Opslaan mislukt: '+e.message}
+  const f={datum:$('datum').value,bedrag:b,categorie:$('cat').value,notitie:$('notitie').value,type:T};
+  let a;
+  if(E){const id=E,u=D.uitgaven.find(x=>x.id===id);Object.assign(u,f);a={actie:'edit',id,...f}}
+  else{const u={id:Date.now().toString(36),wie:S.naam,...f};D.uitgaven.push(u);a={actie:'add',...u}}
+  resetForm();save();render();
+  try{await call(a)}catch(e){$('msg').textContent='Opslaan mislukt: '+e.message}
+}
+function resetForm(){
+  E=null;$('bedrag').value='';$('notitie').value='';$('msg').textContent='';
+  $('bA').textContent='Toevoegen';$('fT').textContent='Nieuwe post';$('bC').hidden=$('bD').hidden=true;
+}
+function edit(id){
+  const u=D.uitgaven.find(x=>x.id===id);if(!u)return;
+  tab(0);E=id;setT(u.type==='in'?'in':'uit',u.categorie);
+  $('bedrag').value=u.bedrag;$('datum').value=String(u.datum).slice(0,10);$('notitie').value=u.notitie||'';
+  $('bA').textContent='Wijziging opslaan';$('fT').textContent='Post bewerken';$('bC').hidden=$('bD').hidden=false;
+  scrollTo({top:0,behavior:'smooth'});
 }
 async function del(id){
-  if(!confirm('Verwijderen?'))return;
-  D.uitgaven=D.uitgaven.filter(u=>u.id!==id);render();
+  if(!id||!confirm('Verwijderen?'))return;
+  D.uitgaven=D.uitgaven.filter(u=>u.id!==id);resetForm();save();render();
   try{await call({actie:'del',id})}catch(e){$('msg').textContent='Verwijderen mislukt: '+e.message}
 }
 async function setBudget(c){
   const v=prompt('Maandbudget voor '+c+' (€)',D.budgetten[c]||'');
   if(v===null)return;const n=parseFloat(v.replace(',','.'))||0;
-  D.budgetten[c]=n;render();
+  D.budgetten[c]=n;save();render();
   try{await call({actie:'budget',categorie:c,bedrag:n})}catch(e){$('msg').textContent='Budget opslaan mislukt'}
 }
 function mv(d){const [y,m]=M.split('-').map(Number);const t=new Date(y,m-1+d,1);M=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0');render()}
-function render(){
+function render(){V===0?renderMonth():V===1?renderAll():renderCharts()}
+function renderMonth(){
   const [y,m]=M.split('-').map(Number);
   $('mnd').textContent=new Date(y,m-1,1).toLocaleDateString('nl-BE',{month:'long',year:'numeric'});
   const us=D.uitgaven.filter(u=>String(u.datum).startsWith(M)).sort((a,b)=>String(b.datum).localeCompare(String(a.datum)));
-  const uit=us.filter(u=>u.type!=='in'),inn=us.filter(u=>u.type==='in'),sum=a=>a.reduce((s,u)=>s+Number(u.bedrag),0);
+  const uit=us.filter(u=>u.type!=='in'),inn=us.filter(u=>u.type==='in'),sal=sum(inn)-sum(uit);
   $('sIn').textContent=eur(sum(inn));$('sUit').textContent=eur(sum(uit));
-  const sal=sum(inn)-sum(uit);$('sSal').textContent=eur(sal);$('sSal').className=sal<0?'neg':''
+  $('sSal').textContent=eur(sal);$('sSal').className=sal<0?'neg':'';
   $('cats').innerHTML=CATS.map(c=>{
-    const t=uit.filter(u=>u.categorie===c).reduce((s,u)=>s+Number(u.bedrag),0),b=D.budgetten[c]||0;
+    const t=sum(uit.filter(u=>u.categorie===c)),b=D.budgetten[c]||0;
     if(!t&&!b)return '';
-    const p=b?Math.min(100,t/b*100):0;
-    return `<div class="cat" onclick="setBudget('${c}')"><div><span>${c}</span><span>${eur(t)}${b?' / '+eur(b):''}</span></div>${b?`<div class="bar"><i class="${t>b?'o':''}" style="width:${p}%"></i></div>`:''}</div>`}).join('')||'<div class="link">Nog niets deze maand.</div>';
-  $('list').innerHTML=us.map(u=>`<div class="it"><div>${esc(u.notitie)||esc(u.categorie)}<small>${esc(u.datum)} · ${esc(u.categorie)} · ${esc(u.wie)}</small></div><div><b class="${u.type==='in'?'pos':''}">${u.type==='in'?'+ ':''}${eur(u.bedrag)}</b><button class="x" onclick="del('${esc(u.id)}')">✕</button></div></div>`).join('');
+    return `<div class="cat" onclick="setBudget('${c}')"><div><span>${c}</span><span>${eur(t)}${b?' / '+eur(b):''}</span></div>${b?`<div class="bar"><i class="${t>b?'o':''}" style="width:${Math.min(100,t/b*100)}%"></i></div>`:''}</div>`}).join('')||'<div class="link">Nog niets deze maand.</div>';
   const w={};uit.forEach(u=>w[u.wie]=(w[u.wie]||0)+Number(u.bedrag));
   $('wie').textContent=Object.keys(w).length>1?'Uitgaven: '+Object.entries(w).map(([k,v])=>k+' '+eur(v)).join(' · '):'';
-  renderYear();
+  $('list').innerHTML=us.map(item).join('')||'<div class="link">Geen posten.</div>';
 }
-function renderYear(){
-  const y=M.slice(0,4),sm=a=>a.reduce((s,u)=>s+Number(u.bedrag),0),ms=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-  const rows=ms.map((n,i)=>{
-    const us=D.uitgaven.filter(u=>String(u.datum).startsWith(y+'-'+String(i+1).padStart(2,'0')));
-    return {n,i:sm(us.filter(u=>u.type==='in')),o:sm(us.filter(u=>u.type!=='in')),has:us.length>0};
-  });
-  const mx=Math.max(1,...rows.map(r=>Math.max(r.i,r.o))),ti=rows.reduce((s,r)=>s+r.i,0),to=rows.reduce((s,r)=>s+r.o,0);
-  $('yT').textContent='Jaaroverzicht '+y+' · saldo '+eur(ti-to);
-  $('year').innerHTML=rows.filter(r=>r.has).map(r=>`<div class="yr"><span>${r.n}</span><div><div class="bar"><i style="width:${r.i/mx*100}%"></i></div><div class="bar"><i class="u" style="width:${r.o/mx*100}%"></i></div></div><b class="${r.i-r.o<0?'neg':''}">${eur(r.i-r.o)}</b></div>`).join('')+(ti||to?'<div class="link">Groen = inkomsten, grijs = uitgaven</div>':'<div class="link">Nog geen gegevens dit jaar.</div>');
+function filtered(){
+  const a=$('fFrom').value,b=$('fTo').value,c=$('fCat').value,t=$('fType').value,q=$('fQ').value.toLowerCase();
+  return D.uitgaven.filter(u=>(!a||String(u.datum)>=a)&&(!b||String(u.datum)<=b)&&(!c||u.categorie===c)&&(!t||(t==='in')===(u.type==='in'))&&(!q||String(u.notitie||'').toLowerCase().includes(q)))
+    .sort((x,y)=>String(y.datum).localeCompare(String(x.datum)));
+}
+function renderAll(){
+  const f=filtered(),i=sum(f.filter(u=>u.type==='in')),o=sum(f.filter(u=>u.type!=='in'));
+  $('fSum').textContent=f.length+' posten · inkomsten '+eur(i)+' · uitgaven '+eur(o)+' · saldo '+eur(i-o);
+  $('all').innerHTML=f.slice(0,300).map(item).join('')+(f.length>300?'<div class="link">Eerste 300 getoond, verfijn de filters.</div>':'')||'<div class="link">Niets gevonden.</div>';
+}
+function clearF(){['fFrom','fTo','fCat','fType','fQ'].forEach(i=>$(i).value='');renderAll()}
+function csv(){
+  const t='datum;type;categorie;bedrag;notitie;wie\n'+filtered().map(u=>[u.datum,u.type==='in'?'inkomst':'uitgave',u.categorie,String(u.bedrag).replace('.',','),'"'+String(u.notitie||'').replace(/"/g,'""')+'"',u.wie].join(';')).join('\n');
+  navigator.clipboard.writeText(t).then(()=>$('fSum').textContent='CSV gekopieerd, plak het in Excel of Numbers.',()=>$('fSum').textContent='Kopiëren mislukt.');
+}
+function chart(cols,colors,max){
+  return '<div class="ch">'+cols.map(c=>`<div class="col"><div class="bars">${c.v.map((x,i)=>`<i title="${eur(x)}" style="height:${x/max*100}%;background:${typeof colors[i]==='function'?colors[i](x):colors[i]}"></i>`).join('')}</div><small>${c.l}</small></div>`).join('')+'</div>';
+}
+function renderCharts(){
+  const n=+$('cR').value,ks=monthKeys(n),cc=$('cC').value,lab=k=>MS[+k.slice(5)-1];
+  const by=k=>D.uitgaven.filter(u=>String(u.datum).startsWith(k));
+  const rows=ks.map(k=>{const us=by(k);return{l:lab(k),i:sum(us.filter(u=>u.type==='in')),o:sum(us.filter(u=>u.type!=='in'))}});
+  const mx=Math.max(1,...rows.map(r=>Math.max(r.i,r.o))),avg=rows.reduce((s,r)=>s+r.i-r.o,0)/n;
+  $('c1').innerHTML=chart(rows.map(r=>({l:r.l,v:[r.i,r.o]})),['#0f6b5f','#7a8b99'],mx)+`<div class="link">Groen = inkomsten, grijs = uitgaven. Gemiddeld saldo per maand: ${eur(avg)}</div>`;
+  const f=u=>cc==='uit'?u.type!=='in':cc==='in'?u.type==='in':u.categorie===cc;
+  const vals=ks.map(k=>sum(by(k).filter(f))),bud=D.budgetten[cc]||0,m2=Math.max(1,bud,...vals);
+  $('c2T').textContent=({uit:'Alle uitgaven',in:'Alle inkomsten'})[cc]||cc;
+  $('c2').innerHTML=chart(ks.map((k,i)=>({l:lab(k),v:[vals[i]]})),[x=>bud&&x>bud?'#b4372a':'#2f5d8a'],m2)+`<div class="link">Totaal ${eur(vals.reduce((a,b)=>a+b,0))}, gemiddeld ${eur(vals.reduce((a,b)=>a+b,0)/n)} per maand${bud?', budget '+eur(bud)+' (rood = erboven)':''}</div>`;
+  const all=D.uitgaven.filter(u=>u.type!=='in'&&ks.includes(String(u.datum).slice(0,7))),bc={};
+  all.forEach(u=>bc[u.categorie]=(bc[u.categorie]||0)+Number(u.bedrag));
+  const ents=Object.entries(bc).sort((a,b)=>b[1]-a[1]),tot=sum(all)||1,m3=ents.length?ents[0][1]:1;
+  $('c3').innerHTML=ents.map(([c,v])=>`<div class="cat" style="cursor:default"><div><span>${esc(c)}</span><span>${eur(v)} (${Math.round(v/tot*100)}%)</span></div><div class="bar"><i style="width:${v/m3*100}%"></i></div></div>`).join('')||'<div class="link">Nog geen uitgaven in deze periode.</div>';
 }
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.url)load()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.url&&!E)load()});
 init();
 </script></body></html>
