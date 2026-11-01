@@ -92,11 +92,22 @@ const $=id=>document.getElementById(id);
 let S=JSON.parse(localStorage.getItem('s')||'{}'),D=JSON.parse(localStorage.getItem('d')||'{"uitgaven":[],"budgetten":{}}'),M=new Date().toISOString().slice(0,7),T='uit',E=null,V=0;
 const eur=n=>'€ '+Number(n).toLocaleString('nl-BE',{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const EN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function nd(v){
+  v=String(v==null?'':v);
+  if(/^\d{4}-\d{2}-\d{2}/.test(v))return v.slice(0,10);
+  const m=v.match(/^\w{3} (\w{3}) (\d{2}) (\d{4})/);
+  if(m&&EN.includes(m[1]))return m[3]+'-'+String(EN.indexOf(m[1])+1).padStart(2,'0')+'-'+m[2];
+  const d=new Date(v);
+  return isNaN(d)?v:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+const fix=()=>D.uitgaven.forEach(u=>u.datum=nd(u.datum));
 const sum=a=>a.reduce((s,u)=>s+Number(u.bedrag),0);
 const opts=a=>a.map(c=>`<option>${c}</option>`).join('');
 const item=u=>`<div class="it" onclick="edit('${esc(u.id)}')"><div>${esc(u.notitie)||esc(u.categorie)}<small>${esc(u.datum)} · ${esc(u.categorie)} · ${esc(u.wie)}</small></div><b class="${u.type==='in'?'pos':''}">${u.type==='in'?'+ ':''}${eur(u.bedrag)}</b></div>`;
 function monthKeys(n){const d=new Date(),a=[];for(let i=n-1;i>=0;i--){const t=new Date(d.getFullYear(),d.getMonth()-i,1);a.push(t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0'))}return a}
 function init(){
+  fix();
   if(!S.url){$('setup').hidden=false;$('app').hidden=true;return}
   $('setup').hidden=true;$('app').hidden=false;
   $('fCat').innerHTML='<option value="">Alle categorieën</option>'+opts(CATS.concat(INCATS));
@@ -122,7 +133,7 @@ async function call(body){
   const j=await r.json();if(j.error)throw new Error(j.error);return j;
 }
 async function load(){
-  try{D=await call();localStorage.setItem('d',JSON.stringify(D));render()}
+  try{D=await call();fix();localStorage.setItem('d',JSON.stringify(D));render()}
   catch(e){$('msg').textContent='Kon niet synchroniseren: '+e.message}
 }
 const save=()=>localStorage.setItem('d',JSON.stringify(D));
